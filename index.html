@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather and DateTime</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f2f2f7;
+            color: #1c1c1e;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #007aff;
+        }
+        #datetime {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #8e8e93;
+        }
+        #weather {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+        }
+        #weather h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #007aff;
+        }
+        #weather p {
+            margin: 8px 0;
+            font-size: 16px;
+            color: #1c1c1e;
+        }
+        #city {
+            font-size: 20px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        #temp {
+            font-size: 56px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #1c1c1e;
+        }
+        #precipitation,
+        #rain {
+            font-size: 16px;
+            color: #8e8e93;
+        }
+        #last-refresh {
+            font-size: 14px;
+            margin-top: 20px;
+            color: #8e8e93;
+        }
+        #refresh-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007aff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #refresh-btn:hover {
+            background-color: #005bb5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Current Date, Time, and Weather</h1>
+    <div id="datetime"></div>
+    <div id="weather">
+        <div id="city"></div>
+        <div id="temp"></div>
+        <div id="precipitation"></div>
+        <div id="rain"></div>
+        <div id="last-update"></div>
+    </div>
+    <div id="last-refresh"></div>
+    <button id="refresh-btn" onclick="manualRefresh()">Refresh</button>
+
+    <script>
+        // Dynamic URL for the backend
+        const backendUrl = 'http://localhost:8000'; // Replace with your backend URL
+
+        // Function to format the date and time in Jakarta timezone
+        function formatJakartaTime(date) {
+            return new Intl.DateTimeFormat('en-US', {
+                timeZone: 'Asia/Jakarta',
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                hour12: false
+            }).format(date);
+        }
+
+        // Function to update the date and time
+        function updateDateTime() {
+            const now = new Date();
+            const jakartaTime = formatJakartaTime(now);
+            document.getElementById('datetime').textContent = `Current Date and Time: ${jakartaTime}`;
+        }
+
+        // Function to fetch the weather data from the backend
+        async function fetchWeather() {
+            try {
+                const response = await fetch(`${backendUrl}/api/weather`);
+                const data = await response.json();
+
+                // Update the weather information
+                document.getElementById('city').textContent = `City: ${data.city}`;
+                document.getElementById('temp').textContent = `${data.temperature_2m.toFixed(1)}°C`;
+                document.getElementById('precipitation').textContent = `Precipitation: ${data.precipitation} mm`;
+                document.getElementById('rain').textContent = `Rain: ${data.rain} mm`;
+                document.getElementById('last-update').textContent = `Updated at: ${formatJakartaTime(new Date(data.time))}`;
+
+                // Update the last refresh time
+                const refreshTime = formatJakartaTime(new Date());
+                document.getElementById('last-refresh').textContent = `Last Refresh: ${refreshTime.split(', ')[1]}`;
+            } catch (error) {
+                document.getElementById('weather').textContent = 'Error fetching weather data.';
+            }
+        }
+
+        // Function to handle manual refresh
+        function manualRefresh() {
+            fetchWeather();
+        }
+
+        // Initial load
+        fetchWeather();
+        updateDateTime();
+
+        // Automatically refresh weather data every 15 minutes (900,000 milliseconds)
+        setInterval(fetchWeather, 900000);
+
+        // Update the date and time every second
+        setInterval(updateDateTime, 1000);
+    </script>
+</body>
+</html>
