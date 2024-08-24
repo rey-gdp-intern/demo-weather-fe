@@ -15,6 +15,9 @@ metadata:
     google.com/cloudbuild-location: 'asia-east1'
     github.com/project-slug: 'rey-gdp-intern/demo-weather-fe'
     backstage.io/techdocs-ref: url:https://demo-weather-fe-techdocs.glair.id  # Add the TechDocs annotation
+  providesApis: []
+  consumesApis:
+    - api:default/demo-weather-be-api
 spec:
   type: service
   owner: group:sre
